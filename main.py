@@ -23,7 +23,7 @@ def is_standard(s):
 
 standards = st.multiselect("standards", df.columns, [c for c in df.columns if is_standard(c)])
 
-samples = st.multiselect("samples", [c for c in df.columns if c not in standards], [c for c in df.columns if c not in standards])
+samples = st.multiselect("samples", df.columns, [c for c in df.columns if c not in standards])
 
 conc_unit = st.selectbox("concentration unit", ["mM", "µM", "nM"])
 
@@ -86,7 +86,8 @@ else:
     # Calculate y-values for the linear regression line
     y_values_linear = linear(x_values, *popt_linear)
 
-    predicted_values = pd.DataFrame({"Sample": samples, "Intensity": [df.loc[metabolite, s] for s in samples]})
+    names = [str(concs.loc[n]) if n in concs.index else n for n in samples]
+    predicted_values = pd.DataFrame({"Sample": samples, "Intensity": [df.loc[metabolite, s] for s in names]})
     predicted_values[f"Predicted Concentration ({conc_unit})"] = predict_linear(predicted_values["Intensity"], *popt_linear)
     predicted_values = predicted_values.set_index("Sample")
     predicted_values[f"Predicted Concentration ({conc_unit})"] = predicted_values[f"Predicted Concentration ({conc_unit})"].apply(lambda x: int(x) if x > 10 else x)
